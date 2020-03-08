@@ -5,10 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hellgate75/go-tcp-client/common"
+	"github.com/hellgate75/go-tcp-common/log"
+	commonnet "github.com/hellgate75/go-tcp-common/net"
 	"io/ioutil"
 	"os"
 	"time"
-	"github.com/hellgate75/go-tcp-client/log"
 )
 
 type tranfer struct{
@@ -55,14 +56,14 @@ func (tranfer *tranfer) SendMessage(conn *tls.Conn, params ...interface{}) error
 		}
 	}
 
-	n0, err3b := common.WriteString(serverCommand, conn)
+	n0, err3b := commonnet.WriteString(serverCommand, conn)
 	if err3b != nil {
 		return err3b
 	}
 	if n0 == 0 {
 		return errors.New(fmt.Sprintf("Unable to send command: %s", serverCommand))
 	}
-	n00, err3c := common.WriteString(typeOfFile, conn)
+	n00, err3c := commonnet.WriteString(typeOfFile, conn)
 	if err3c != nil {
 		return err3c
 	}
@@ -76,7 +77,7 @@ func (tranfer *tranfer) SendMessage(conn *tls.Conn, params ...interface{}) error
 	if n1 == 0 {
 		return errors.New(fmt.Sprintf("Unable to send destination folder: %s", destination))
 	}
-	n2, err5 := common.WriteString(perm, conn)
+	n2, err5 := commonnet.WriteString(perm, conn)
 	if err5 != nil {
 		return err5
 	}
@@ -85,7 +86,7 @@ func (tranfer *tranfer) SendMessage(conn *tls.Conn, params ...interface{}) error
 	}
 	if typeOfFile != "folder" {
 		time.Sleep(3 * time.Second)
-		n3, err6 := common.Write(data, conn)
+		n3, err6 := commonnet.Write(data, conn)
 		if err6 != nil {
 			return err6
 		}

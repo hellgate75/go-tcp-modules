@@ -6,13 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gookit/color"
+	commonnet "github.com/hellgate75/go-tcp-common/net"
 	"github.com/hellgate75/go-tcp-client/common"
+	"github.com/hellgate75/go-tcp-common/log"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
-	"github.com/hellgate75/go-tcp-client/log"
 )
 
 type shell struct{
@@ -97,16 +98,16 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 		var script string = ""
 		if isScriptFile {
 			if !existsFile(shellCommandOrScript) {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return errors.New(fmt.Sprintf("Script File %s doesn't exists!!", shellCommandOrScript))
 			}
 			n2, err5 := common.WriteString("script", conn)
 			if err5 != nil {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return err5
 			}
 			if n2 == 0 {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return errors.New(fmt.Sprintf("Unable to send script file type: %v", isScriptFile))
 			}
 			fileName := shellCommandOrScript
@@ -119,27 +120,27 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 			}
 			n2, err5 = common.WriteString(fileName, conn)
 			if err5 != nil {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return err5
 			}
 			if n2 == 0 {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return errors.New(fmt.Sprintf("Unable to send script file type: %v", isScriptFile))
 			}
 			content, errReadScript := loadFile(shellCommandOrScript)
 			if errReadScript != nil {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return errors.New(fmt.Sprintf("Cannot read script File %s -> Details: %s", shellCommandOrScript, errReadScript.Error()))
 			}
 			script = string(content)
 		} else {
 			n2, err5 := common.WriteString("command", conn)
 			if err5 != nil {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return err5
 			}
 			if n2 == 0 {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return errors.New(fmt.Sprintf("Unable to send COMMAND -> script file type: %v", isScriptFile))
 			}
 			script = shellCommandOrScript
@@ -149,7 +150,7 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 				return err6
 			}
 			if n3 == 0 {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				return errors.New(fmt.Sprintf("Unable to send data -> shell command: %v", script))
 			}
 		}
@@ -181,7 +182,7 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 	} else {
 		n2, err5 := common.WriteString("shell", conn)
 		if err5 != nil {
-			common.WriteString("exit", conn)
+			commonnet.WriteString("exit", conn)
 			if stderr != nil {
 				if nil != shell.logger {
 					shell.logger.Error("Error: exit shell: " + err5.Error() + "!!")
@@ -198,7 +199,7 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 			return err5
 		}
 		if n2 == 0 {
-			common.WriteString("exit", conn)
+			commonnet.WriteString("exit", conn)
 			if stderr != nil {
 				if nil != shell.logger {
 					shell.logger.Error("Error: exit shell!!")
@@ -252,12 +253,12 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 						color.Yellow.Println("Request: exit shell!!")
 					}
 				}
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				break
 			}
 			n3, err6 := common.WriteString(currentCommand, conn)
 			if err6 != nil {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				if stderr != nil {
 					if nil != shell.logger {
 						shell.logger.Error("Error: exit shell: " + err6.Error() + "!!")
@@ -274,7 +275,7 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 				return err6
 			}
 			if n3 == 0 {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				if stderr != nil {
 					if nil != shell.logger {
 						shell.logger.Error("Error: exit shell!!")
@@ -293,7 +294,7 @@ func (shell *shell) SendMessage(conn *tls.Conn, params ...interface{}) error {
 			//time.Sleep(3 * time.Second)
 			content, errAnswer := common.Read(conn)
 			if errAnswer != nil {
-				common.WriteString("exit", conn)
+				commonnet.WriteString("exit", conn)
 				if stderr != nil {
 					if nil != shell.logger {
 						shell.logger.Error("Error: exit shell: " + errAnswer.Error() + "!!")

@@ -3,8 +3,9 @@ package transfer
 import (
 	"crypto/tls"
 	"github.com/gookit/color"
+	commonnet "github.com/hellgate75/go-tcp-common/net"
 	"github.com/hellgate75/go-tcp-server/common"
-	"github.com/hellgate75/go-tcp-server/log"
+	"github.com/hellgate75/go-tcp-common/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -20,15 +21,15 @@ func (tranfer *tranfer) SetLogger(logger log.Logger) {
 }
 
 func (tranfer *tranfer) Execute(conn *tls.Conn) error {
-	fileType, err0 := common.ReadString(conn)
+	fileType, err0 := commonnet.ReadString(conn)
 	if err0 != nil {
 		return err0
 	}
-	filePath, err1 := common.ReadString(conn)
+	filePath, err1 := commonnet.ReadString(conn)
 	if err1 != nil {
 		return err1
 	}
-	filePerm, err2 := common.ReadString(conn)
+	filePerm, err2 := commonnet.ReadString(conn)
 	if err2 != nil {
 		return err2
 	}
@@ -57,7 +58,7 @@ func (tranfer *tranfer) Execute(conn *tls.Conn) error {
 			color.Green.Printf("Folder: %s created!!\n", filePath)
 		}
 	} else {
-		data, err3 := common.Read(conn)
+		data, err3 := commonnet.Read(conn)
 		if err3 != nil {
 			return err3
 		}

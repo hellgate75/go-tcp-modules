@@ -6,7 +6,7 @@ import (
 	"github.com/hellgate75/go-tcp-modules/client/proxy/shell"
 	"github.com/hellgate75/go-tcp-modules/client/proxy/transfer"
 	"github.com/hellgate75/go-tcp-client/common"
-	"github.com/hellgate75/go-tcp-client/log"
+	"github.com/hellgate75/go-tcp-common/log"
 )
 
 var sendersMap map[string]common.Sender = make(map[string]common.Sender)

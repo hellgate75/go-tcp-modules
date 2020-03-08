@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	commonnet "github.com/hellgate75/go-tcp-common/net"
 	"github.com/gookit/color"
 	"github.com/hellgate75/go-tcp-server/common"
-	"github.com/hellgate75/go-tcp-server/log"
+	"github.com/hellgate75/go-tcp-common/log"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -81,12 +82,12 @@ func (shell *shell) SetLogger(logger log.Logger) {
 }
 
 func (shell *shell) Execute(conn *tls.Conn) error {
-	interactive, err1 := common.ReadString(conn)
+	interactive, err1 := commonnet.ReadString(conn)
 	if err1 != nil {
 		return err1
 	}
 
-	action, err2 := common.ReadString(conn)
+	action, err2 := commonnet.ReadString(conn)
 	if err2 != nil {
 		return err2
 	}
@@ -100,12 +101,12 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 			var message string = "Cannot run SCRIPT interactive!!"
 			return errors.New(message)
 		}
-		fileName, err3 := common.ReadString(conn)
+		fileName, err3 := commonnet.ReadString(conn)
 		if err3 != nil {
 			return err3
 		}
 		time.Sleep(2 * time.Second)
-		data, err4 := common.Read(conn)
+		data, err4 := commonnet.Read(conn)
 		if err4 != nil {
 			return err4
 		}
@@ -120,7 +121,7 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 			return errF
 		}
 		time.Sleep(2 * time.Second)
-		common.WriteString("ok:continue shell", conn)
+		commonnet.WriteString("ok:continue shell", conn)
 		var output string
 		var errExec error
 		if strings.Contains(strings.ToLower(file), ".exe") ||
@@ -134,25 +135,25 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 		os.Remove(file)
 		os.Remove(folder)
 		if errExec != nil {
-			common.Write([]byte(output), conn)
+			commonnet.Write([]byte(output), conn)
 			return errExec
 		}
-		common.Write([]byte(output), conn)
+		commonnet.Write([]byte(output), conn)
 	} else if "command" == action {
 		if "true" == interactive {
 			var message string = "Cannot run COMMAND interactive!!"
 			return errors.New(message)
 		}
-		data, err3 := common.Read(conn)
+		data, err3 := commonnet.Read(conn)
 		if err3 != nil {
 			return err3
 		}
 		time.Sleep(2 * time.Second)
-		common.WriteString("ok:continue shell", conn)
+		commonnet.WriteString("ok:continue shell", conn)
 		output, errExec := execCommand(string(data))
 		if errExec != nil {
 			var message string = "shell:command (cmd:"+string(data)+") ::exec->"+errExec.Error()
-			common.Write([]byte(message), conn)
+			commonnet.Write([]byte(message), conn)
 			if shell.logger != nil {
 				shell.logger.Errorf("Error excuting command: %s, Details: %s", string(data), errExec.Error())
 			} else {
@@ -160,7 +161,7 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 			}
 			return errExec
 		}
-		common.Write([]byte(output), conn)
+		commonnet.Write([]byte(output), conn)
 	} else if "shell" == action {
 		if "false" == interactive {
 			var message string = "Cannot run SHELL non interactive!!"
@@ -169,7 +170,7 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 		var command string = ""
 		var err3 error
 		for "exit" != strings.ToLower(command) && err3 == nil {
-			command, err3 = common.ReadString(conn)
+			command, err3 = commonnet.ReadString(conn)
 			if err3 == nil && "exit" != strings.ToLower(command) {
 				if "" == command {
 					continue
@@ -183,9 +184,9 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 				output, err3 = execCommand(command)
 				//time.Sleep(2*time.Second)
 				if err3 == nil {
-					common.Write([]byte(output), conn)
+					commonnet.Write([]byte(output), conn)
 				} else {
-					common.Write([]byte(err3.Error()), conn)
+					commonnet.Write([]byte(err3.Error()), conn)
 				}
 			} else if err3 != nil {
 				if shell.logger != nil {
@@ -198,7 +199,7 @@ func (shell *shell) Execute(conn *tls.Conn) error {
 		if err3 != nil {
 			return err3
 		}
-		common.WriteString("ok", conn)
+		commonnet.WriteString("ok", conn)
 	} else {
 		return errors.New("Invalid action: " + action)
 	}
